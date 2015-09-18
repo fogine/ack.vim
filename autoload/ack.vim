@@ -5,7 +5,7 @@ if exists('g:ack_use_dispatch')
   endif
 else
   let g:ack_use_dispatch = 0
-endif
+end
 
 "-----------------------------------------------------------------------------
 " Public API
@@ -18,6 +18,7 @@ function! ack#Ack(cmd, args) "{{{
   " Local values that we'll temporarily set as options when searching
   let l:grepprg = g:ackprg
   let l:grepformat = '%f:%l:%c:%m,%f:%l:%m'  " Include column number
+  let shellpipe_bak=&shellpipe
 
   " Strip some options that are meaningless for path search and set match
   " format accordingly.
@@ -32,6 +33,7 @@ function! ack#Ack(cmd, args) "{{{
   " NOTE: we escape special chars, but not everything using shellescape to
   "       allow for passing arguments etc
   let l:escaped_args = escape(l:grepargs, '|#%')
+  let &shellpipe=">"
 
   echo "Searching ..."
 
@@ -196,8 +198,10 @@ function! s:SearchWithGrep(grepcmd, grepprg, grepargs, grepformat) "{{{
 
     silent execute a:grepcmd a:grepargs
   finally
+    let shellpipe_bak=&shellpipe
     let &l:grepprg  = l:grepprg_bak
     let &grepformat = l:grepformat_bak
+    let &shellpipe=shellpipe_bak
   endtry
 endfunction "}}}
 
@@ -224,4 +228,4 @@ function! s:Warn(msg) "{{{
   echohl WarningMsg | echomsg 'Ack: ' . a:msg | echohl None
 endf "}}}
 
-" vim:set et sw=2 ts=2 tw=78 fdm=marker
+"
